@@ -1,0 +1,9 @@
+twig:
+    file_name_pattern: '*.twig'
+    globals:
+        kendolicensing: '141j044b041h541j4i1d542e58285k264c22502j5f465d3857345h3c5k3f5i3f613k4e304e3f53092f4b564930464k361h0j203f4f434c4154315f39580i304852092h442i45304951482e152c0k1e330d612c513627412a3e2b4e4160245e0k3601265j084d063i1242523a0k'
+        crudServiceBaseUrl: 'http://back.local/api/article'
+
+when@test:
+    twig:
+        strict_variables: true

@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Article index{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+      KendoLicensing.setScriptKey('{{ kendolicensing }}')
+
+      $(document).ready(function () {
+        var crudServiceBaseUrl = "{{ crudServiceBaseUrl }}";
+
+        const gridDataSource = new kendo.data.DataSource({
+          transport: {
+            read: {
+              url: crudServiceBaseUrl,
+              dataType: "json",
+              type: "GET"
+            },
+            create: {
+              url: crudServiceBaseUrl + '/create',
+              dataType: "json",
+              type: "POST"
+            },
+            'update': {
+              url: crudServiceBaseUrl + '/update',
+              dataType: "json",
+              type: "POST"
+            },
+            'destroy': {
+              url: crudServiceBaseUrl +"/destroy",
+              dataType: "json",
+              type: "DELETE"
+            },
+            parameterMap: function (options, operation) {
+              if (operation !== "read") {
+                return JSON.stringify(options);
+              }
+            }
+          },
+          batch: false,
+          schema: {
+            model: {
+              "id": "id",
+              fields: {
+                "id": {type: "number", editable: false},
+                'title': {type: "string", editable: true, nullable: true},
+                'content': {type: "string", editable: true, nullable: true},
+              }
+            }
+          },
+          pageSize: 10,
+          sort: {
+            field: "id", dir: "asc"
+          }
+        });
+
+        gridDataSource.fetch(function () {
+          var products = gridDataSource.data();
+          /* The result can be observed in the DevTools(F12) console of the browser. */
+          console.log(products); // displays "Chai"
+          console.log(products[0].id); // displays "Chai"
+          console.log(products[1].id); // displays "Chai"
+          console.log(gridDataSource.data()); // displays "77"
+
+          gridDataSource.sync();
+        });
+
+        $("#articlesGrid").kendoGrid({
+          columns: [
+            {field: "id", title: "Id"},
+            {field: "title", title: "Title"},
+            {field: "content", title: "Content"},
+            {command: ["edit", "destroy"], title: "&nbsp;", width: "250px"},
+          ],
+          dataSource: gridDataSource,
+          height: 550,
+          pageable: true,
+          sortable: true,
+          filterable: true,
+          editable: {destroy: true},
+          // navigatable: true,
+          toolbar: ["create", "save", "cancel"],
+        });
+      });
+
+    </script>
+{% endblock %}
+
+{% block body %}
+    <h1>Article index</h1>
+    <div id="articlesGrid"></div>
+{% endblock %}

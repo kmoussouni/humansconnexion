@@ -1,0 +1,56 @@
+
+services:
+  proxy:
+    build:
+      context: docker/proxy
+      dockerfile: Dockerfile
+    container_name: proxy
+    hostname: proxy
+    env_file:
+      - .env
+    ports:
+      - 80:80/tcp
+      - 443:443/tcp
+    volumes:
+      - ./.env:/var/www/html/.env:rw
+      - ./public:/var/www/html/public:rw
+      - ./src:/var/www/html/src:rw
+      - ./templates:/var/www/html/templates:rw
+      #      - ./tests:/var/www/html/tests:rw
+      - ./var:/var/www/html/var:rw
+      - ./translations:/var/www/html/translations:rw
+      - ./vendor:/var/www/html/vendor:rw
+
+  back:
+    build: docker/back
+    container_name: back
+    hostname: back
+    volumes:
+      - ./:/var/www/html:rw
+
+  database:
+    image: postgres:${POSTGRES_VERSION:-16}-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-app}", "-U", "${POSTGRES_USER:-app}"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    volumes:
+      - database_data:/var/lib/postgresql/data:rw
+
+  cache:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes:
+      - cache:/data
+
+volumes:
+  database_data:
+  cache:
